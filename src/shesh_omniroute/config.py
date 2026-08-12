@@ -46,23 +46,15 @@ class Config:
         return key or None
 
     def ensure_api_key(self) -> str:
-        """Load or create the gateway key; always 0600, never logged."""
+        """Load or create the gateway key; always 0600, never logged.
+
+        The generated key lives only in the config dir's api.key file. To
+        source it from an external store instead, pre-seed api.key from
+        your secret manager (e.g. gopass/KeePassXC via shesh-secrets refs).
+        """
         existing = self.api_key()
         if existing:
             return existing
-        # shesh-secrets first if available
-        try:
-            from shesh_secrets import get_secret  # type: ignore
-
-            try:
-                stored = get_secret("omniroute:api-key")
-                if stored:
-                    self._write_key(stored)
-                    return stored
-            except (OSError, KeyError, RuntimeError):
-                pass
-        except ImportError:
-            pass
         key = "sk-shesh-" + _secrets.token_urlsafe(32)
         self._write_key(key)
         return key

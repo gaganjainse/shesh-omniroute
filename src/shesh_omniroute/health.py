@@ -14,8 +14,10 @@ def probe(base_url: str, timeout: float = 3.0) -> bool:
     try:
         with urllib.request.urlopen(req, timeout=timeout):
             return True
-    except urllib.error.HTTPError:
-        # 401/403 = server IS up, just needs the key
+    except urllib.error.HTTPError as e:
+        # 401/403 = server IS up, just needs the key. HTTPError wraps an open
+        # response object — it must be closed or its socket leaks.
+        e.close()
         return True
     except (urllib.error.URLError, TimeoutError, OSError):
         return False

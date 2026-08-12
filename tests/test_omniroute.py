@@ -108,6 +108,7 @@ class TestHealth:
         port = srv.server_address[1]
         assert probe(f"http://127.0.0.1:{port}/v1") is True
         srv.shutdown()
+        srv.server_close()  # release the listening socket; shutdown() alone leaves it open
 
     def test_probe_down(self):
         assert probe("http://127.0.0.1:9/v1", timeout=0.5) is False
