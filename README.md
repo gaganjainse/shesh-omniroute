@@ -32,3 +32,8 @@ Gateway API key: generated on first start, stored with 0600 at
 - `templates/` — container env + routes config rendered on start
 - `tests/` — full offline test suite (mocked container backend + health server)
 - `Containerfile` — builds the gateway image from our fork
+
+## Security
+
+Security posture and vulnerability reporting: [canonical ecosystem security
+policy](https://github.com/gaganjainse/shesh-ecosystem/blob/main/SECURITY.md).
