@@ -5,12 +5,43 @@ from __future__ import annotations
 import dataclasses
 import shutil
 import subprocess
+from typing import ClassVar
 
 from .config import Config
 
+# Operation labels for BackendError — centralized so raise sites carry no
+# message strings (TRY003) and the excerpt policy below stays keyed by them.
+OP_START = "container start"
+OP_RUN = "container run"
+OP_STOP = "container stop"
+OP_LOGS = "container logs"
+OP_BUILD = "image build"
+
 
 class BackendError(RuntimeError):
-    pass
+    """A container-backend CLI operation failed.
+
+    The message is constructed here — not at the raise site — so the stderr
+    excerpt policy lives in exactly one place, and a None stderr can no
+    longer crash the error path itself.
+    """
+
+    #: stderr excerpt policy per operation: (keep_tail, char_limit).
+    #: Short-lived ops show the head; builds fail at the tail of the log.
+    EXCERPT_POLICY: ClassVar[dict[str, tuple[bool, int]]] = {
+        OP_START: (False, 300),
+        OP_RUN: (False, 300),
+        OP_STOP: (False, 300),
+        OP_LOGS: (False, 300),
+        OP_BUILD: (True, 500),
+    }
+
+    def __init__(self, operation: str, stderr: str | None) -> None:
+        self.operation = operation
+        tail, limit = self.EXCERPT_POLICY.get(operation, (False, 300))
+        excerpt = (stderr or "").strip()
+        excerpt = excerpt[-limit:] if tail else excerpt[:limit]
+        super().__init__(f"{operation} failed: {excerpt}")
 
 
 @dataclasses.dataclass
@@ -42,7 +73,7 @@ class Backend:
         if self.exists(cfg.container_name):
             proc = self._run("start", cfg.container_name, timeout=120, capture=True)
             if proc.returncode != 0 and "already running" not in (proc.stderr or "").lower():
-                raise BackendError(f"container start failed: {proc.stderr.strip()[:300]}")
+                raise BackendError(OP_START, proc.stderr)
             return
         args = [
             "run", "-d",
@@ -55,18 +86,18 @@ class Backend:
         ]
         proc = self._run(*args, timeout=180)
         if proc.returncode != 0:
-            raise BackendError(f"container run failed: {proc.stderr.strip()[:300]}")
+            raise BackendError(OP_RUN, proc.stderr)
 
     def stop(self, cfg: Config) -> None:
         if self.exists(cfg.container_name):
             proc = self._run("stop", cfg.container_name, timeout=60)
             if proc.returncode != 0:
-                raise BackendError(f"container stop failed: {proc.stderr.strip()[:300]}")
+                raise BackendError(OP_STOP, proc.stderr)
 
     def logs(self, cfg: Config, tail: int = 100) -> str:
         proc = self._run("logs", "--tail", str(tail), cfg.container_name, timeout=30)
         if proc.returncode != 0:
-            raise BackendError(f"container logs failed: {proc.stderr.strip()[:300]}")
+            raise BackendError(OP_LOGS, proc.stderr)
         return proc.stdout
 
     def image_present(self, image: str) -> bool:
@@ -76,7 +107,7 @@ class Backend:
     def build(self, containerfile: str, tag: str, context: str, timeout: int = 1800) -> None:
         proc = self._run("build", "-f", containerfile, "-t", tag, context, timeout=timeout, capture=True)
         if proc.returncode != 0:
-            raise BackendError(f"image build failed: {proc.stderr.strip()[-500:]}")
+            raise BackendError(OP_BUILD, proc.stderr)
 
 
 def detect_backend(which=shutil.which) -> Backend | None:

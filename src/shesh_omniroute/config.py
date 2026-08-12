@@ -81,6 +81,13 @@ class Config:
             return {}
 
 
+class ConfigError(ValueError):
+    """config.json exists but is not valid JSON."""
+
+    def __init__(self, path, cause: json.JSONDecodeError) -> None:
+        super().__init__(f"{path}: invalid JSON at line {cause.lineno}: {cause.msg}")
+
+
 def load_config(config_dir: Path | None = None) -> Config:
     """Env wins over file wins over defaults."""
     cfg = Config()
@@ -89,8 +96,12 @@ def load_config(config_dir: Path | None = None) -> Config:
     file_settings: dict = {}
     try:
         file_settings = json.loads((cfg.config_dir / "config.json").read_text())
-    except (OSError, json.JSONDecodeError):
-        pass
+    except FileNotFoundError:
+        pass  # no config file yet — defaults are the correct answer
+    except json.JSONDecodeError as e:
+        # A malformed config silently reverting to defaults is the classic
+        # "why is my setting ignored" failure. Refuse loudly instead.
+        raise ConfigError(cfg.config_dir / "config.json", e) from None
     cfg.port = int(os.environ.get("SHESH_OMNIROUTE_PORT", file_settings.get("port", cfg.port)))
     cfg.image = os.environ.get("SHESH_OMNIROUTE_IMAGE", file_settings.get("image", cfg.image))
     return cfg

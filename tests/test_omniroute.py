@@ -153,3 +153,23 @@ class TestCLI:
         monkeypatch.setattr(FakeBackend, "image_present", lambda self, image: False)
         assert main(["start"]) == 3
         assert "build first" in capsys.readouterr().err
+
+
+def test_malformed_config_raises_instead_of_silent_defaults(tmp_path):
+    """Silent-failure sweep guard: a config.json with invalid JSON must raise
+    ConfigError (it used to be swallowed, silently reverting to defaults and
+    making user settings vanish)."""
+    import pytest
+
+    from shesh_omniroute.config import ConfigError, load_config
+
+    (tmp_path / "config.json").write_text("{not json")
+    with pytest.raises(ConfigError):
+        load_config(config_dir=tmp_path)
+
+
+def test_missing_config_file_uses_defaults(tmp_path):
+    from shesh_omniroute.config import load_config
+
+    cfg = load_config(config_dir=tmp_path)
+    assert isinstance(cfg.port, int)
