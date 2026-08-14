@@ -7,7 +7,7 @@ name = "shesh-omniroute"
 version = "0.1.0"
 description = "Shesh wrapper: run the OmniRoute OpenAI-compatible LLM gateway in a rootless container"
 authors = [{ name = "Gagan Jain" }]
-license = { text = "MIT" }
+license = { text = "GPL-3.0-or-later" }
 requires-python = ">=3.11"
 dependencies = []
 

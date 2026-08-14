@@ -37,3 +37,7 @@ Gateway API key: generated on first start, stored with 0600 at
 
 Security posture and vulnerability reporting: [canonical ecosystem security
 policy](https://github.com/gaganjainse/shesh-ecosystem/blob/main/SECURITY.md).
+
+## License
+
+GPL-3.0-or-later — see [LICENSE](LICENSE).
