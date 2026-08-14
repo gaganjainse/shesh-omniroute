@@ -1,17 +1,17 @@
-# shesh-omniroute — Shesh wrapper around the OmniRoute gateway
+# 🌐 shesh-omniroute
 
-Self-hosted, OpenAI-compatible LLM gateway for the whole Shesh stack. Runs our
-fork ([`gaganjainse/OmniRoute`](https://github.com/gaganjainse/OmniRoute),
-branch `release/v3.8.50`, upstream [`diegosouzapw/OmniRoute`](https://github.com/diegosouzapw/OmniRoute))
-in a **rootless podman** container (docker works too) and exposes
-`http://localhost:20128/v1` to every Shesh client:
+> **Shesh wrapper around the OmniRoute gateway.** Self-hosted, OpenAI-compatible
+> LLM gateway for the whole Shesh stack — runs our OmniRoute fork in a rootless
+> podman container and exposes `http://localhost:20128/v1` to every client.
 
-- desktop apps and agents use it as the single model endpoint
-- the swarm LLM worker routes through it when `SHESH_OMNIROUTE_BASE_URL` is set
-  (see `shesh-ecosystem/tools/llm_adapter.py`, provider `omniroute`)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python) ![License](https://img.shields.io/badge/License-GPL--3.0--or--later-blue?style=for-the-badge) ![Tests](https://img.shields.io/badge/Tests-17-success?style=for-the-badge) ![CI](https://github.com/gaganjainse/shesh-omniroute/actions/workflows/ci.yml.yml/badge.svg)
 
-Everything here is real and tested: CLI lifecycle (start/stop/status/logs),
-config rendering, health-wait, secrets handoff via `shesh-secrets`.
+- **License:** GPL-3.0-or-later
+- **Owner:** Gagan Jain ([@gaganjainse](https://github.com/gaganjainse))
+- **Layer:** Soma (gateway — optional cloud fallback)
+- **Part of:** [shesh-ecosystem](https://github.com/gaganjainse/shesh-ecosystem)
+
+---
 
 ## Quick start
 
@@ -22,7 +22,7 @@ shesh-omniroute status           # endpoint + health + routing-ready check
 export SHESH_OMNIROUTE_BASE_URL=http://localhost:20128/v1
 ```
 
-Gateway API key: generated on first start, stored with 0600 at
+Gateway API key: generated on first start, stored with `0600` at
 `~/.config/shesh/omniroute/api.key`, or pushed into shesh-secrets as
 `omniroute:api-key` when shesh-secrets is installed.
 
@@ -33,14 +33,16 @@ Gateway API key: generated on first start, stored with 0600 at
 - `tests/` — full offline test suite (mocked container backend + health server)
 - `Containerfile` — builds the gateway image from our fork
 
-## Security
+## Status
 
-Security posture and vulnerability reporting: [canonical ecosystem security
-policy](https://github.com/gaganjainse/shesh-ecosystem/blob/main/SECURITY.md).
+Component CI is green (reusable ecosystem pipeline). Security posture and
+vulnerability reporting: [SECURITY.md](SECURITY.md).
+
+## Documentation index
+
+- **Part of:** [shesh-ecosystem](https://github.com/gaganjainse/shesh-ecosystem)
+- **Compiled reading:** [shesh-docs](https://github.com/gaganjainse/shesh-docs)
 
 ## License
 
 GPL-3.0-or-later — see [LICENSE](LICENSE).
-## 📚 Docs
-
-Fleet-wide reading compilation: [shesh-docs](https://github.com/gaganjainse/shesh-docs).
