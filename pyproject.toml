@@ -24,3 +24,4 @@ testpaths = ["tests"]
 # BLE+TRY are errors, not style: blind `except Exception` is where silent
 # failures live. See shesh-ecosystem/docs (2026-08-12 silent-failure sweep).
 extend-select = ["BLE", "TRY"]
+
