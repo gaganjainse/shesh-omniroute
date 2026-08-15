@@ -14,7 +14,8 @@ DEFAULT_FORK = "https://github.com/gaganjainse/OmniRoute.git"
 DEFAULT_REF = "release/v3.8.50"
 CONTAINER_NAME = "shesh-omniroute"
 
-CONFIG_DIR = Path(os.environ.get("SHESH_CONFIG_HOME", Path.home() / ".config" / "shesh" / "omniroute"))
+CONFIG_DIR = Path(os.environ.get(
+    "SHESH_CONFIG_HOME", Path.home() / ".config" / "shesh" / "omniroute"))
 
 
 @dataclasses.dataclass

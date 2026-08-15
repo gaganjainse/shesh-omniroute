@@ -50,7 +50,8 @@ class Backend:
 
     binary: str
 
-    def _run(self, *args: str, timeout: int = 120, capture: bool = True) -> subprocess.CompletedProcess:
+    def _run(self, *args: str, timeout: int = 120,
+             capture: bool = True) -> subprocess.CompletedProcess:
         proc = subprocess.run(
             [self.binary, *args],
             capture_output=capture,
@@ -81,7 +82,8 @@ class Backend:
             "--restart", "unless-stopped",
             "-p", f"127.0.0.1:{cfg.port}:20128",
             "-e", "OMNIROUTE_API_KEY=" + api_key,
-            "-v", f"{cfg.config_dir}:/data:Z" if self.binary.endswith("podman") else f"{cfg.config_dir}:/data",
+            "-v", (f"{cfg.config_dir}:/data:Z" if self.binary.endswith("podman")
+                   else f"{cfg.config_dir}:/data"),
             cfg.image,
         ]
         proc = self._run(*args, timeout=180)
@@ -105,7 +107,8 @@ class Backend:
         return proc.returncode == 0
 
     def build(self, containerfile: str, tag: str, context: str, timeout: int = 1800) -> None:
-        proc = self._run("build", "-f", containerfile, "-t", tag, context, timeout=timeout, capture=True)
+        proc = self._run("build", "-f", containerfile, "-t", tag, context,
+                         timeout=timeout, capture=True)
         if proc.returncode != 0:
             raise BackendError(OP_BUILD, proc.stderr)
 

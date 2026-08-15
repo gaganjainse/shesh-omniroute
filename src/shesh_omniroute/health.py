@@ -23,7 +23,8 @@ def probe(base_url: str, timeout: float = 3.0) -> bool:
         return False
 
 
-def wait_healthy(base_url: str, timeout: float = 60.0, interval: float = 1.0, sleep=time.sleep, now=time.monotonic) -> bool:
+def wait_healthy(base_url: str, timeout: float = 60.0, interval: float = 1.0,
+                 sleep=time.sleep, now=time.monotonic) -> bool:
     deadline = now() + timeout
     while now() < deadline:
         if probe(base_url):
