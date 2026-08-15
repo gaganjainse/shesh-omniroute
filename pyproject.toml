@@ -19,6 +19,8 @@ shesh-omniroute = "shesh_omniroute.cli:main"
 where = ["src"]
 
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 
@@ -33,3 +35,11 @@ extend-select = ["BLE", "TRY"]
 select = ["E", "F", "W", "UP", "B", "SIM", "I"]
 ignore = ["E402"]
 
+[tool.ruff.lint]
+# BLE and TRY are errors rather than style: a blind `except Exception` is
+# where silent failures live. Rationale: governance/silent-failures.md.
+select = ["E", "F", "W", "UP", "B", "SIM", "I", "BLE", "TRY"]
+ignore = ["E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F401", "E402", "E501"]
