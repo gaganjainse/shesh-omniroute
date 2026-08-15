@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "shesh-omniroute"
 version = "0.1.0"
 description = "Shesh wrapper: run the OmniRoute OpenAI-compatible LLM gateway in a rootless container"
+readme = "README.md"
 authors = [{ name = "Gagan Jain" }]
 license = { text = "GPL-3.0-or-later" }
 requires-python = ">=3.11"
@@ -19,9 +20,16 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
 
 [tool.ruff.lint]
 # BLE+TRY are errors, not style: blind `except Exception` is where silent
 # failures live. See shesh-ecosystem/docs (2026-08-12 silent-failure sweep).
 extend-select = ["BLE", "TRY"]
+select = ["E", "F", "W", "UP", "B", "SIM", "I"]
+ignore = ["E402"]
 

@@ -28,8 +28,10 @@ def _status_text(cfg) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="shesh-omniroute", description="Run the OmniRoute gateway for Shesh")
-    ap.add_argument("command", choices=["start", "stop", "restart", "status", "logs", "build", "print-env"])
+    ap = argparse.ArgumentParser(prog="shesh-omniroute",
+                                 description="Run the OmniRoute gateway for Shesh")
+    ap.add_argument("command", choices=["start", "stop", "restart", "status",
+                                        "logs", "build", "print-env"])
     ap.add_argument("--tail", type=int, default=100)
     ap.add_argument("--wait", type=float, default=60.0)
     args = ap.parse_args(argv)
@@ -68,14 +70,16 @@ def main(argv: list[str] | None = None) -> int:
         if args.command in ("start", "restart"):
             key = cfg.ensure_api_key()
             if not backend.image_present(cfg.image):
-                print(f"image {cfg.image} missing — build first: shesh-omniroute build", file=sys.stderr)
+                print(f"image {cfg.image} missing — build first: "
+                      "shesh-omniroute build", file=sys.stderr)
                 return 3
             backend.start(cfg, key)
             if wait_healthy(cfg.base_url, timeout=args.wait):
                 cfg.write_state(running=True)
                 print(f"up: {cfg.base_url}")
                 return 0
-            print("container started but health probe timed out; check: shesh-omniroute logs", file=sys.stderr)
+            print("container started but health probe timed out; "
+                  "check: shesh-omniroute logs", file=sys.stderr)
             return 4
         if args.command == "logs":
             print(backend.logs(cfg, tail=args.tail))

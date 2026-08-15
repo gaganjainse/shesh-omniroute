@@ -55,7 +55,9 @@ class FakeBackend(Backend):
 
         self.calls.append(args)
         out = "true" if args[0:2] == ("container", "inspect") and self._running else ""
-        return subprocess.CompletedProcess(args, self._rc if args[0] != "container" or self._running else 1, out, self._stderr)
+        return subprocess.CompletedProcess(
+            args, self._rc if args[0] != "container" or self._running else 1,
+            out, self._stderr)
 
 
 class TestBackend:
@@ -72,7 +74,8 @@ class TestBackend:
         run_call = next(c for c in fb.calls if c[0] == "run")
         assert "--name" in run_call and "shesh-omniroute" in run_call
         assert "OMNIROUTE_API_KEY=sk-test-key" in run_call
-        assert any(a.endswith(":/data:Z") for a in run_call), "podman needs :Z for selinux/fuse mounts"
+        assert any(a.endswith(":/data:Z") for a in run_call), (
+            "podman needs :Z for selinux/fuse mounts")
         assert any("127.0.0.1" in a for a in run_call), "port bound to localhost only"
 
     def test_start_failure_raises(self, cfg):
