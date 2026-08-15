@@ -19,7 +19,6 @@ shesh-omniroute = "shesh_omniroute.cli:main"
 where = ["src"]
 
 [tool.pytest.ini_options]
-asyncio_mode = "auto"
 pythonpath = ["src"]
 testpaths = ["tests"]
 
