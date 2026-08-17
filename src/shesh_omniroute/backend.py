@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import dataclasses
+import os
 import shutil
 import subprocess
+import tempfile
+from pathlib import Path
 from typing import ClassVar
 
 from .config import Config
@@ -76,19 +79,31 @@ class Backend:
             if proc.returncode != 0 and "already running" not in (proc.stderr or "").lower():
                 raise BackendError(OP_START, proc.stderr)
             return
-        args = [
-            "run", "-d",
-            "--name", cfg.container_name,
-            "--restart", "unless-stopped",
-            "-p", f"127.0.0.1:{cfg.port}:20128",
-            "-e", "OMNIROUTE_API_KEY=" + api_key,
-            "-v", (f"{cfg.config_dir}:/data:Z" if self.binary.endswith("podman")
-                   else f"{cfg.config_dir}:/data"),
-            cfg.image,
-        ]
-        proc = self._run(*args, timeout=180)
-        if proc.returncode != 0:
-            raise BackendError(OP_RUN, proc.stderr)
+        env_dir = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp"))
+        env_dir.mkdir(parents=True, exist_ok=True)
+        fd, env_path = tempfile.mkstemp(prefix="shesh-omniroute-", dir=env_dir, text=True)
+        try:
+            os.fchmod(fd, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write("OMNIROUTE_API_KEY=" + api_key + "\n")
+            args = [
+                "run", "-d",
+                "--name", cfg.container_name,
+                "--restart", "unless-stopped",
+                "-p", f"127.0.0.1:{cfg.port}:20128",
+                "--env-file", env_path,
+                "-v", (f"{cfg.config_dir}:/data:Z" if self.binary.endswith("podman")
+                       else f"{cfg.config_dir}:/data"),
+                cfg.image,
+            ]
+            proc = self._run(*args, timeout=180)
+            if proc.returncode != 0:
+                raise BackendError(OP_RUN, proc.stderr)
+        finally:
+            try:
+                os.unlink(env_path)
+            except FileNotFoundError:
+                pass
 
     def stop(self, cfg: Config) -> None:
         if self.exists(cfg.container_name):
