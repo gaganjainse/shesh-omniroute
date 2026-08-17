@@ -73,7 +73,8 @@ class TestBackend:
         fb.start(cfg, "sk-test-key")
         run_call = next(c for c in fb.calls if c[0] == "run")
         assert "--name" in run_call and "shesh-omniroute" in run_call
-        assert "OMNIROUTE_API_KEY=sk-test-key" in run_call
+        assert "OMNIROUTE_API_KEY=sk-test-key" not in run_call
+        assert "--env-file" in run_call
         assert any(a.endswith(":/data:Z") for a in run_call), (
             "podman needs :Z for selinux/fuse mounts")
         assert any("127.0.0.1" in a for a in run_call), "port bound to localhost only"
